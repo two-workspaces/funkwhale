@@ -1,0 +1,122 @@
+# yaml-language-server: $schema=https://schema.zeabur.app/template.json
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+    name: Funkwhale
+spec:
+    description: Federated music server — stream your library, playlists, podcasts.
+    icon: https://dev.funkwhale.audio/funkwhale/funkwhale/-/raw/stable/front/public/android-chrome-192x192.png
+    tags:
+        - Music
+        - Audio
+        - Fediverse
+        - Subsonic
+        - Open Source
+    readme: |-
+        # Funkwhale
+
+        [Funkwhale](https://funkwhale.audio/) is a self-hosted, federated audio platform: upload your music library, stream it from any device (web or Subsonic apps), create playlists and radios, publish podcasts, and optionally federate with other pods over ActivityPub.
+
+        ## After deployment
+
+        1. Log in with username `fwadmin` and the password shown in the service instructions.
+        2. Upload music via the web UI (Libraries) or any Subsonic-compatible client.
+        3. The hostname is your pod's federated identity — set it before federating if you attach a custom domain.
+
+        Template source: [nomideusz/funkwhale-railway](https://github.com/nomideusz/funkwhale-railway)
+    variables:
+        - key: PUBLIC_DOMAIN
+          type: DOMAIN
+          name: Public Domain
+          description: The domain of your Funkwhale pod (federated identity!)
+    services:
+        - name: postgresql
+          icon: https://www.postgresql.org/media/img/about/press/elephant.png
+          template: PREBUILT
+          spec:
+            source:
+                image: postgres:17-alpine
+            ports:
+                - id: database
+                  port: 5432
+                  type: TCP
+            volumes:
+                - id: data
+                  dir: /var/lib/postgresql/data
+            env:
+                PGDATA:
+                    default: /var/lib/postgresql/data/pgdata
+                    expose: false
+                POSTGRES_DB:
+                    default: funkwhale
+                    expose: true
+                POSTGRES_USER:
+                    default: funkwhale
+                    expose: true
+                POSTGRES_PASSWORD:
+                    default: ${PASSWORD}
+                    expose: true
+                POSTGRES_HOST:
+                    default: ${CONTAINER_HOSTNAME}
+                    expose: true
+        - name: redis
+          icon: https://media.ffycdn.net/us/redis/MAQLWqeBKmrz2TFQDmA7.svg?mod=v1/resize=2400
+          template: PREBUILT
+          spec:
+            source:
+                image: redis:7-alpine
+            ports:
+                - id: database
+                  port: 6379
+                  type: TCP
+            env:
+                REDIS_HOST:
+                    default: ${CONTAINER_HOSTNAME}
+                    expose: true
+        - name: funkwhale
+          icon: https://dev.funkwhale.audio/funkwhale/funkwhale/-/raw/stable/front/public/android-chrome-192x192.png
+          template: PREBUILT
+          domainKey: PUBLIC_DOMAIN
+          dependencies:
+            - postgresql
+            - redis
+          spec:
+            source:
+                image: ghcr.io/nomideusz/funkwhale-railway:latest
+            ports:
+                - id: web
+                  port: 80
+                  type: HTTP
+            volumes:
+                - id: data
+                  dir: /srv/funkwhale/data
+            env:
+                FUNKWHALE_HOSTNAME:
+                    default: ${ZEABUR_WEB_DOMAIN}
+                    expose: false
+                FUNKWHALE_PROTOCOL:
+                    default: https
+                    expose: false
+                DJANGO_SECRET_KEY:
+                    default: ${POSTGRES_PASSWORD}
+                    expose: false
+                DATABASE_URL:
+                    default: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
+                    expose: false
+                CACHE_URL:
+                    default: redis://${REDIS_HOST}:6379/0
+                    expose: false
+                FUNKWHALE_ADMIN_USERNAME:
+                    default: fwadmin
+                    expose: false
+                FUNKWHALE_ADMIN_EMAIL:
+                    default: fwadmin@${ZEABUR_WEB_DOMAIN}
+                    expose: false
+                FUNKWHALE_ADMIN_PASSWORD:
+                    default: ${PASSWORD}
+                    expose: false
+            instructions:
+                - title: Log in as fwadmin with this password
+                  content: ${PASSWORD}
+                - title: Your pod
+                  content: https://${ZEABUR_WEB_DOMAIN}

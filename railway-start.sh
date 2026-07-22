@@ -19,11 +19,13 @@ envsubst '${FUNKWHALE_API_HOST} ${FUNKWHALE_API_PORT} ${NGINX_MAX_BODY_SIZE} ${M
 funkwhale-manage migrate --noinput
 funkwhale-manage collectstatic --noinput
 
-# First-boot admin; user exists already -> ignore
-if [ -n "$FUNKWHALE_ADMIN_USERNAME" ]; then
+# First-boot admin; user exists already -> ignore.
+# NOTE: funkwhale rejects blacklisted usernames ("admin", "root", ...) and
+# passwords similar to the username — template default is fwadmin + random secret.
+if [ -n "$FUNKWHALE_ADMIN_PASSWORD" ]; then
   funkwhale-manage fw users create --superuser \
-    -u "$FUNKWHALE_ADMIN_USERNAME" \
-    -e "${FUNKWHALE_ADMIN_EMAIL:-admin@$FUNKWHALE_HOSTNAME}" \
+    -u "${FUNKWHALE_ADMIN_USERNAME:-fwadmin}" \
+    -e "${FUNKWHALE_ADMIN_EMAIL:-fwadmin@$FUNKWHALE_HOSTNAME}" \
     -p "$FUNKWHALE_ADMIN_PASSWORD" || true
 fi
 
