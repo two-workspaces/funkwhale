@@ -1,6 +1,6 @@
 # Deploy and Host Funkwhale on Railway
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/funkwhale?utm_medium=integration&utm_source=button&utm_campaign=funkwhale)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/funkwhale?referralCode=sLjDXb&utm_medium=integration&utm_source=button&utm_campaign=funkwhale)
 
 [Funkwhale](https://funkwhale.audio/) is a self-hosted, federated audio platform: upload your music library, stream it from any device (web, Subsonic apps), create playlists and radios, publish podcasts and channels, and optionally federate with other Funkwhale pods over ActivityPub.
 
