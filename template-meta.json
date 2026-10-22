@@ -1,0 +1,8 @@
+{
+  "id": "2b3aa978-208c-48bf-b0ad-5f0d2f0f7a5c",
+  "name": "Funkwhale",
+  "description": "Federated music server \u2014 stream your library, playlists, podcasts.",
+  "category": "Other",
+  "image": "https://docs.funkwhale.audio/_static/logo.svg",
+  "published": true
+}

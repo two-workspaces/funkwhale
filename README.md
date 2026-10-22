@@ -6,7 +6,7 @@
 
 ## Screenshots
 
-![Funkwhale album browsing](https://raw.githubusercontent.com/nomideusz/funkwhale-railway/main/images/01.jpg)
+![Funkwhale album browsing](https://raw.githubusercontent.com/two-workspaces/funkwhale/main/images/01.jpg)
 
 ## About Hosting Funkwhale
 
@@ -25,7 +25,7 @@ This template runs Funkwhale as three Railway services. The main service is a co
 ### Deployment Dependencies
 
 - [Funkwhale documentation](https://docs.funkwhale.audio/)
-- [Template source on GitHub](https://github.com/nomideusz/funkwhale-railway)
+- [Template source on GitHub](https://github.com/two-workspaces/funkwhale)
 
 ### Implementation Details
 

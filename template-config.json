@@ -1,0 +1,157 @@
+{
+  "buckets": {},
+  "services": {
+    "5983b6f1-6088-4056-8b37-d4202d4a25c6": {
+      "icon": "https://media.ffycdn.net/us/redis/MAQLWqeBKmrz2TFQDmA7.svg?mod=v1/resize=2400",
+      "name": "redis",
+      "deploy": {
+        "startCommand": "docker-entrypoint.sh redis-server --save '' --appendonly no",
+        "healthcheckPath": null,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "redis:7-alpine"
+      },
+      "variables": {},
+      "haTemplateCode": "redis-ha",
+      "haConversionConfig": {
+        "edge": {
+          "label": "Reverse Proxies",
+          "options": [
+            1,
+            2
+          ],
+          "nodeLabel": "HAProxy",
+          "description": "HAProxy instances routing writes to the primary",
+          "defaultValue": 2
+        },
+        "replica": {
+          "label": "Redis Replicas",
+          "options": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "nodeLabel": "Redis",
+          "description": "Nodes running Redis + colocated Sentinel",
+          "defaultValue": 2
+        },
+        "internal": null,
+        "description": "This will convert your Redis instance to an HA cluster with Sentinel failover and HAProxy routing to the primary."
+      }
+    },
+    "8252f0e4-73c8-493f-905d-f7296e91e36a": {
+      "icon": "https://www.postgresql.org/media/img/about/press/elephant.png",
+      "name": "postgres",
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": null,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "postgres:17-alpine"
+      },
+      "variables": {
+        "PGDATA": {
+          "isOptional": false,
+          "description": "Don't change.",
+          "defaultValue": "/var/lib/postgresql/data/pgdata"
+        },
+        "POSTGRES_DB": {
+          "isOptional": false,
+          "description": "Don't change.",
+          "defaultValue": "funkwhale"
+        },
+        "POSTGRES_USER": {
+          "isOptional": false,
+          "description": "Don't change.",
+          "defaultValue": "funkwhale"
+        },
+        "POSTGRES_PASSWORD": {
+          "isOptional": false,
+          "description": "Database password. Auto generated.",
+          "defaultValue": "${{secret(32)}}"
+        }
+      },
+      "volumeMounts": {
+        "8252f0e4-73c8-493f-905d-f7296e91e36a": {
+          "mountPath": "/var/lib/postgresql/data"
+        }
+      }
+    },
+    "c96e446a-8f5e-4b74-a4aa-4a9cd95c0e05": {
+      "icon": "https://docs.funkwhale.audio/_static/logo.svg",
+      "name": "funkwhale",
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/funkwhale",
+        "rootDirectory": null
+      },
+      "variables": {
+        "PORT": {
+          "isOptional": false,
+          "description": "Port for Railway healthcheck probing. Do not change.",
+          "defaultValue": "80"
+        },
+        "CACHE_URL": {
+          "isOptional": false,
+          "description": "Wired automatically to the redis service. Don't change.",
+          "defaultValue": "redis://${{redis.RAILWAY_PRIVATE_DOMAIN}}:6379/0"
+        },
+        "DATABASE_URL": {
+          "isOptional": false,
+          "description": "Wired automatically to the postgres service. Don't change.",
+          "defaultValue": "postgres://funkwhale:${{postgres.POSTGRES_PASSWORD}}@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/funkwhale"
+        },
+        "DJANGO_SECRET_KEY": {
+          "isOptional": false,
+          "description": "Django secret key. Auto generated.",
+          "defaultValue": "${{secret(50)}}"
+        },
+        "FUNKWHALE_HOSTNAME": {
+          "isOptional": false,
+          "description": "Pod hostname \u2014 your federated identity. Wired automatically.",
+          "defaultValue": "${{RAILWAY_PUBLIC_DOMAIN}}"
+        },
+        "FUNKWHALE_PROTOCOL": {
+          "isOptional": false,
+          "description": "Don't change.",
+          "defaultValue": "https"
+        },
+        "FUNKWHALE_ADMIN_EMAIL": {
+          "isOptional": false,
+          "description": "Admin account email.",
+          "defaultValue": "fwadmin@${{RAILWAY_PUBLIC_DOMAIN}}"
+        },
+        "FUNKWHALE_ADMIN_PASSWORD": {
+          "isOptional": false,
+          "description": "Sign-in password for the admin account. Auto generated.",
+          "defaultValue": "${{secret(16)}}"
+        },
+        "FUNKWHALE_ADMIN_USERNAME": {
+          "isOptional": false,
+          "description": "Admin username ('admin' and 'root' are reserved by Funkwhale).",
+          "defaultValue": "fwadmin"
+        }
+      },
+      "networking": {
+        "serviceDomains": {
+          "<hasDomain>": {}
+        }
+      },
+      "volumeMounts": {
+        "c96e446a-8f5e-4b74-a4aa-4a9cd95c0e05": {
+          "mountPath": "/srv/funkwhale/data"
+        }
+      }
+    }
+  }
+}
