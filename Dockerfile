@@ -1,6 +1,6 @@
-FROM funkwhale/front:latest AS front
+FROM funkwhale/front:2.0.12 AS front
 
-FROM funkwhale/api:latest
+FROM funkwhale/api:2.0.12
 
 # Combined single-service image for Railway: gunicorn + celery (worker -B) + nginx
 # in one container sharing one volume — Railway volumes can't be shared across services.
